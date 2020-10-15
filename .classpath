@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="src" path="Path-Finding-master/source"/>
+	<classpathentry kind="lib" path="Path-Finding-master/jar/Path Finding.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
