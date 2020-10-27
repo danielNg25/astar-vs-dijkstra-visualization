@@ -533,7 +533,19 @@ public class PathFinding {
 		
 		public ArrayList<Node> exploreNeighbors(Node current, int hops) {	//EXPLORE NEIGHBORS
 			ArrayList<Node> explored = new ArrayList<Node>();	//LIST OF NODES THAT HAVE BEEN EXPLORED
-			int[][] pos = {{-1, 0}, {1, 0}, {0, 1},{0, -1}, {-1,-1}, {1, -1},{-1, 1},{1,1}};
+			current.calAngle();
+			if (current.angle == 0) {
+				int[][] pos = {{1, -1}, {1, 0}, {1, 1}};
+			}
+			else if (current.angle == Math.PI) {
+				int[][] pos = {{-1, -1}, {-1, 0}, {-1, 1}};
+			}
+			else if (current.angle == 3*Math.PI/2) {
+				int[][] pos = {{-1, -1}, {-1, 0}, {-1, 1}};
+			}
+			else if (current.angle == Math.PI/2) {
+				int[][] pos = {{-1, -1}, {-1, 0}, {-1, 1}};
+			}
 			for (int[] newPos: pos) {
 				int xbound = current.getX()+newPos[0];
 				int ybound = current.getY()+newPos[1];
@@ -589,6 +601,7 @@ public class PathFinding {
 		private int y;
 		private int lastX;
 		private int lastY;
+		private double angle;
 		private double dToEnd = 0;
 	
 		public Node(int type, int x, int y) {	//CONSTRUCTOR
@@ -605,6 +618,32 @@ public class PathFinding {
 			return dToEnd;
 		}
 		
+		public void calAngle() {
+			int subX = lastX-x;
+			int subY = lastY-y;
+		    if (subX == -1) {
+		    	if (subY == -1)
+		    		angle = Math.PI/4;
+		    	else if(subY == 0)
+		    		angle = 0;
+		    	else if(subY == 1)
+		    		angle = 7*Math.PI/4;
+		    }
+		    else if (subX == 0) {
+		    	if (subY == -1)
+		    		angle = Math.PI/2;
+		    	else if (subY == 1)
+		    		angle = 3*Math.PI/2;
+		    }
+		    else if (subX == 1) {
+		    	if (subY == -1)
+		    		angle = 3*Math.PI/4;
+		    	else if (subY == 0)
+		    		angle = Math.PI;
+		    	else if (subY == 1)
+		    		angle = 5*Math.PI/4;
+		    }
+		}
 		public int getX() {return x;}		//GET METHODS
 		public int getY() {return y;}
 		public int getLastX() {return lastX;}
@@ -694,7 +733,6 @@ public class PathFinding {
 				at.rotate(3*Math.PI/2);
 			}
 		
-			
 			
 			if(this.angle==Math.PI/4) {
 				at.translate(x*CSIZE- at.getTranslateX()+(car.getHeight() -car.getWidth())*Math.sqrt(2)/4, y*CSIZE-at.getTranslateY()-(car.getHeight() +car.getWidth())*Math.sqrt(2)/4);
