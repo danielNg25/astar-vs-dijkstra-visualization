@@ -1,4 +1,5 @@
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -8,10 +9,14 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.awt.geom.AffineTransform;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Random;
 
 import javax.swing.JFrame;
+import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -30,7 +35,7 @@ public class PathFinding {
 	//FRAME
 	JFrame frame;
 	//GENERAL VARIABLES
-	private int cells = 20;
+	private int cells = 500;
 	private int delay = 30;
 	private double dense = .5;
 	private double density = (cells*cells)*.5;
@@ -42,9 +47,9 @@ public class PathFinding {
 	private int checks = 0;
 	private int length = 0;
 	private int curAlg = 0;
-	private int WIDTH = 850;
-	private final int HEIGHT = 650;
-	private final int MSIZE = 600;
+	private int WIDTH = 1440;
+	private final int HEIGHT = 1080;
+	private final int MSIZE = 1000;
 	private int CSIZE = MSIZE/cells;
 	//UTIL ARRAYS
 	private String[] algorithms = {"Dijkstra","A*"};
@@ -55,15 +60,19 @@ public class PathFinding {
 	Node[][] map;
 	Algorithm Alg = new Algorithm();
 	Random r = new Random();
+	ArrayList<Node> path;
+	Car car = new Car();
+	//IMAGE
+	
+	BufferedImage destination;
+	
 	//SLIDERS
-	JSlider size = new JSlider(1,5,2);
+
 	JSlider speed = new JSlider(0,500,delay);
 	JSlider obstacles = new JSlider(1,100,50);
 	//LABELS
 
 	JLabel toolL = new JLabel("Toolbox");
-	JLabel sizeL = new JLabel("Size:");
-	JLabel cellsL = new JLabel(cells+"x"+cells);
 	JLabel delayL = new JLabel("Delay:");
 	JLabel msL = new JLabel(delay+"ms");
 	JLabel obstacleL = new JLabel("Dens:");
@@ -150,70 +159,63 @@ public class PathFinding {
 		frame.getContentPane().setLayout(null);
 		
 		toolP.setBorder(BorderFactory.createTitledBorder(loweredetched,"Controls"));
-		int space = 25;
-		int buff = 45;
+		int space = 50;
+		int buff = 90;
 		
 		toolP.setLayout(null);
-		toolP.setBounds(10,11,210,600);
+		toolP.setBounds(40,11,250,1000);
 		
-		searchB.setBounds(40,space, 120, 25);
+		searchB.setBounds(40,space, 150, 25);
 		toolP.add(searchB);
 		space+=buff;
 		
-		resetB.setBounds(40,space,120,25);
+		resetB.setBounds(40,space,150,25);
 		toolP.add(resetB);
 		space+=buff;
 		
-		genMapB.setBounds(40,space, 120, 25);
+		genMapB.setBounds(40,space, 150, 25);
 		toolP.add(genMapB);
 		space+=buff;
 		
-		clearMapB.setBounds(40,space, 120, 25);
+		clearMapB.setBounds(40,space, 150, 25);
 		toolP.add(clearMapB);
-		space+=40;
+		space+=buff;
 		
 	
 		
-		toolL.setBounds(40,space,120,25);
+		toolL.setBounds(40,space,150,25);
 		toolP.add(toolL);
-		space+=25;
+		space+=40;
 		
-		toolBx.setBounds(40,space,120,25);
+		toolBx.setBounds(40,space,150,25);
 		toolP.add(toolBx);
 		space+=buff;
 		
-		sizeL.setBounds(15,space,40,25);
-		toolP.add(sizeL);
-		size.setMajorTickSpacing(10);
-		size.setBounds(50,space,100,25);
-		toolP.add(size);
-		cellsL.setBounds(160,space,40,25);
-		toolP.add(cellsL);
-		space+=buff;
+
 		
 		delayL.setBounds(15,space,50,25);
 		toolP.add(delayL);
 		speed.setMajorTickSpacing(5);
-		speed.setBounds(50,space,100,25);
+		speed.setBounds(50,space,120,25);
 		toolP.add(speed);
-		msL.setBounds(160,space,40,25);
+		msL.setBounds(170,space,90,25);
 		toolP.add(msL);
 		space+=buff;
 		
-		obstacleL.setBounds(15,space,100,25);
+		obstacleL.setBounds(15,space,120,25);
 		toolP.add(obstacleL);
 		obstacles.setMajorTickSpacing(5);
-		obstacles.setBounds(50,space,100,25);
+		obstacles.setBounds(50,space,120,25);
 		toolP.add(obstacles);
-		densityL.setBounds(160,space,100,25);
+		densityL.setBounds(170,space,120,25);
 		toolP.add(densityL);
 		space+=buff;
 		
-		checkL.setBounds(15,space,100,25);
+		checkL.setBounds(50,space,100,25);
 		toolP.add(checkL);
 		space+=buff;
 		
-		lengthL.setBounds(15,space,100,25);
+		lengthL.setBounds(50,space,100,25);
 		toolP.add(lengthL);
 		space+=buff;
 		
@@ -222,7 +224,7 @@ public class PathFinding {
 		frame.getContentPane().add(toolP);
 		
 		canvas = new Map();
-		canvas.setBounds(230, 10, MSIZE+1, MSIZE+1);
+		canvas.setBounds(350, 15, MSIZE+1, MSIZE+1);
 		frame.getContentPane().add(canvas);
 		
 		searchB.addActionListener(new ActionListener() {		//ACTION LISTENERS
@@ -261,15 +263,7 @@ public class PathFinding {
 				tool = toolBx.getSelectedIndex();
 			}
 		});
-		size.addChangeListener(new ChangeListener() {
-			@Override
-			public void stateChanged(ChangeEvent e) {
-				cells = size.getValue()*10;
-				clearMap();
-				reset();
-				Update();
-			}
-		});
+		
 		speed.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
@@ -312,9 +306,9 @@ public class PathFinding {
 	
 	public void Update() {	//UPDATE ELEMENTS OF THE GUI
 		density = (cells*cells)*dense;
-		CSIZE = MSIZE/cells;
+
 		canvas.repaint();
-		cellsL.setText(cells+"x"+cells);
+
 		msL.setText(delay+"ms");
 		lengthL.setText("Path Length: "+length);
 		densityL.setText(obstacles.getValue()+"%");
@@ -327,11 +321,13 @@ public class PathFinding {
 		checks = 0;
 	}
 	
-	public void delay() {	//DELAY METHOD
+	public void delay(int delay) {	//DELAY METHOD
 		try {
 			Thread.sleep(delay);
 		} catch(Exception e) {}
 	}
+	
+
 	
 	class Map extends JPanel implements MouseListener, MouseMotionListener{	//MAP CLASS
 		
@@ -340,15 +336,31 @@ public class PathFinding {
 			addMouseMotionListener(this);
 		}
 		
-		public void paintComponent(Graphics g) {	//REPAINT
+		public void paintComponent(Graphics g) {	
 			super.paintComponent(g);
+			Graphics2D g2d = (Graphics2D) g;
+			try {
+				destination = ImageIO.read(getClass().getResourceAsStream("/destination.png"));
+			}catch(Exception e) {
+				e.printStackTrace();
+			}
+			
+			AffineTransform carat = AffineTransform.getTranslateInstance(0, 0);
+			AffineTransform desat = AffineTransform.getTranslateInstance(0, 0);
+			boolean cared = false;
+			boolean desed = false;
+			boolean solved = false;
 			for(int x = 0; x < cells; x++) {	//PAINT EACH NODE IN THE GRID
 				for(int y = 0; y < cells; y++) {
 					switch(map[x][y].getType()) {
 						case 0:
+							carat.translate(x*CSIZE-car.getCar().getWidth()/2, y*CSIZE-car.getCar().getHeight()/2);
+							cared = true;
 							g.setColor(Color.GREEN);
 							break;
 						case 1:
+							desat.translate(x*CSIZE-destination.getWidth()/2, y*CSIZE-destination.getHeight()/2);
+							desed = true;
 							g.setColor(Color.RED);
 							break;
 						case 2:
@@ -361,21 +373,35 @@ public class PathFinding {
 							g.setColor(Color.CYAN);
 							break;
 						case 5:
+							cared = false;
+							solved = true;
+							carat.translate(x*CSIZE- carat.getTranslateX()-car.getCar().getHeight()/2, y*CSIZE-carat.getTranslateY()+car.getCar().getWidth()/2);
+							carat.rotate(3*Math.PI/2);
+							break;
+						case 6:
 							g.setColor(Color.YELLOW);
 							break;
 					}
 					g.fillRect(x*CSIZE,y*CSIZE,CSIZE,CSIZE);
 					g.setColor(Color.BLACK);
-					g.drawRect(x*CSIZE,y*CSIZE,CSIZE,CSIZE);
-					//DEBUG STUFF
-					/*
-					if(curAlg == 1)
-						g.drawString(map[x][y].getHops()+"/"+map[x][y].getEuclidDist(), (x*CSIZE)+(CSIZE/2)-10, (y*CSIZE)+(CSIZE/2));
-					else 
-						g.drawString(""+map[x][y].getHops(), (x*CSIZE)+(CSIZE/2), (y*CSIZE)+(CSIZE/2));
-					*/
 				}
 			}
+			if (desed == true) {
+				g2d.drawImage(destination, desat, null);
+				desed = false;
+			}
+			
+			if (solved == true) {
+				g2d.drawImage(car.getCar(), carat, null);
+			}
+			if (cared == true) {
+				g2d.drawImage(car.getCar(), carat, null);
+				cared = false;
+			}
+			
+			
+			
+			
 		}
 
 		@Override
@@ -383,9 +409,13 @@ public class PathFinding {
 			try {
 				int x = e.getX()/CSIZE;	
 				int y = e.getY()/CSIZE;
-				Node current = map[x][y];
-				if((tool == 2 || tool == 3) && (current.getType() != 0 && current.getType() != 1))
-					current.setType(tool);
+				for (int i = -5; i<=5; i ++) {
+					for (int j = -5; j <=5; j++) {
+						Node current = map[x+i][y+j];
+						if((tool == 2 || tool == 3) && (current.getType() != 0 && current.getType() != 1))
+							current.setType(tool);
+					}
+				}
 				Update();
 			} catch(Exception z) {}
 		}
@@ -420,6 +450,7 @@ public class PathFinding {
 							startx = x;	//SET THE START X AND Y
 							starty = y;
 							current.setType(0);	//SET THE NODE CLICKED TO BE START
+							car.initCar(current);
 						}
 						break;
 					}
@@ -432,6 +463,14 @@ public class PathFinding {
 							current.setType(1);	//SET THE NODE CLICKED TO BE FINISH
 						}
 						break;
+					}
+					case 2:{
+						for (int i = -5; i<=5; i ++) {
+							for (int j = -5; j <=5; j++) {
+								Node cur = map[x+i][y+j];
+								cur.setType(2);
+							}
+						}
 					}
 					default:
 						if(current.getType() != 0 && current.getType() != 1)
@@ -453,6 +492,7 @@ public class PathFinding {
 		//THIS MEANS THAT NODES THAT ARE CLOSER TO THE FINISH WILL BE EXPLORED FIRST
 		//THIS HEURISTIC IS BUILT IN BY SORTING THE QUE ACCORDING TO HOPS PLUS DISTANCE UNTIL THE FINISH
 		public void AStar() {
+			path = new ArrayList<>();
 			ArrayList<Node> priority = new ArrayList<Node>();
 			priority.add(map[startx][starty]);
 			while(solving) {
@@ -466,7 +506,7 @@ public class PathFinding {
 					priority.remove(0);
 					priority.addAll(explored);
 					Update();
-					delay();
+					delay(delay);
 				} else {
 					priority.remove(0);
 				}
@@ -494,7 +534,7 @@ public class PathFinding {
 		
 		public ArrayList<Node> exploreNeighbors(Node current, int hops) {	//EXPLORE NEIGHBORS
 			ArrayList<Node> explored = new ArrayList<Node>();	//LIST OF NODES THAT HAVE BEEN EXPLORED
-			int[][] pos = {{-1, 0}, {1, 0}, {0, 1},{0, -1}};
+			int[][] pos = {{-1, 0}, {1, 0}, {0, 1},{0, -1}, {-1,-1}, {1, -1},{-1, 1},{1,1}};
 			for (int[] newPos: pos) {
 				int xbound = current.getX()+newPos[0];
 				int ybound = current.getY()+newPos[1];
@@ -524,18 +564,26 @@ public class PathFinding {
 			length = hops;
 			while(hops > 1) {	//BACKTRACK FROM THE END OF THE PATH TO THE START
 				Node current = map[lx][ly];
-				current.setType(5);
+				path.add(current);
 				lx = current.getLastX();
 				ly = current.getLastY();
 				hops--;
+			}
+			Collections.reverse(path);
+			for (Node node: path) {
+				car.initCar(node);
+				map[node.getLastX()][node.getLastY()].setType(6);
+				node.setType(5);
+				Update();
+				delay(100);
 			}
 			solving = false;
 		}
 	}
 	
+	
 	class Node {
 		
-		// 0 = start, 1 = finish, 2 = wall, 3 = empty, 4 = checked, 5 = finalpath
 		private int cellType = 0;
 		private int hops;
 		private int x;
@@ -569,4 +617,106 @@ public class PathFinding {
 		public void setLastNode(int x, int y) {lastX = x; lastY = y;}
 		public void setHops(int hops) {this.hops = hops;}
 	}
+
+	
+	class Car{
+		//THE CENTER OF CAR's HEAD
+		private int x;
+		private int y;
+		private int lastX;
+		private int lastY;
+		private int w; //WIDTH
+		private int l; //LENGTH
+		private BufferedImage car;
+		
+		private double angle;
+		
+		public Car(){
+			try {
+				this.car = ImageIO.read(getClass().getResourceAsStream("/car.png"));
+			}catch(Exception e) {
+				e.printStackTrace();
+			}
+			
+			this.angle = 0;
+		}
+		
+		public void initCar(Node node) {
+			this.x = node.getX();
+			this.y = node.getY();
+			this.lastX = node.getLastX();
+			this.lastY = node.getLastY();
+			
+			calAngle();
+		}
+		
+		public void calAngle() {
+		    double slope1 = y - lastY / x - lastX;
+		    double slope2 = 1 - 0 / 1 - 0;
+		    this.setAngle(Math.atan((slope1 - slope2) / (1 - (slope1 * slope2)))+Math.PI/2);
+		}
+		
+		public AffineTransform transForm(AffineTransform at) {
+			if(this.angle == 0) {
+				at.translate(x*CSIZE- at.getTranslateX()-car.getWidth()/2, y*CSIZE-at.getTranslateY()-car.getHeight()/2);
+				at.rotate(0);
+			}
+			if(this.angle == Math.PI/2) {
+				at.translate(x*CSIZE- at.getTranslateX()+car.getHeight()/2, y*CSIZE-at.getTranslateY()-car.getWidth()/2);
+				at.rotate(Math.PI/2);
+			}
+			if(this.angle == Math.PI) {
+				at.translate(x*CSIZE- at.getTranslateX()+car.getWidth()/2, y*CSIZE-at.getTranslateY()+car.getHeight()/2);
+				at.rotate(Math.PI);
+			}
+			if(this.angle == 3*Math.PI/2) {
+				at.translate(x*CSIZE- at.getTranslateX()-car.getHeight()/2, y*CSIZE+at.getTranslateY()-car.getWidth()/2);
+				at.rotate(3*Math.PI/2);
+			}
+			
+			return null;
+			
+		}
+		
+		//Setter/Getter
+		public int getLastX() {
+			return lastX;
+		}
+		public void setLastX(int lastX) {
+			this.lastX = lastX;
+		}
+		public int getLastY() {
+			return lastY;
+		}
+		public void setLastY(int lastY) {
+			this.lastY = lastY;
+		}
+		public BufferedImage getCar() {
+			return car;
+		}
+		public void setCar(BufferedImage car) {
+			this.car = car;
+		}
+		
+		public int getX() {return x;}
+		public int getY() {return y;}
+		public int getW() {return w;}
+		public int getL() {	return l;}
+		
+		public void setX(int x) {this.x = x;}
+		public void setY(int y) {this.y = y;}
+		public void setW(int w) {this.w = w;}
+		public void setL(int l) {this.l = l;}
+
+		public double getAngle() {
+			return angle;
+		}
+
+		public void setAngle(double angle) {
+			this.angle = angle;
+		}
+		
+		
+	}
+	
 }
