@@ -375,8 +375,7 @@ public class PathFinding {
 						case 5:
 							cared = false;
 							solved = true;
-							carat.translate(x*CSIZE- carat.getTranslateX()-car.getCar().getHeight()/2, y*CSIZE-carat.getTranslateY()+car.getCar().getWidth()/2);
-							carat.rotate(3*Math.PI/2);
+							carat = car.transForm(carat,x,y);
 							break;
 						case 6:
 							g.setColor(Color.YELLOW);
@@ -651,13 +650,34 @@ public class PathFinding {
 		}
 		
 		public void calAngle() {
-		    double slope1 = y - lastY / x - lastX;
-		    double slope2 = 1 - 0 / 1 - 0;
-		    this.setAngle(Math.atan((slope1 - slope2) / (1 - (slope1 * slope2)))+Math.PI/2);
+			int subX = lastX-x;
+			int subY = lastY-y;
+		    if (subX == -1) {
+		    	if (subY == -1)
+		    		angle = Math.PI/4;
+		    	else if(subY == 0)
+		    		angle = 0;
+		    	else if(subY == 1)
+		    		angle = 7*Math.PI/4;
+		    }
+		    else if (subX == 0) {
+		    	if (subY == -1)
+		    		angle = Math.PI/2;
+		    	else if (subY == 1)
+		    		angle = 3*Math.PI/2;
+		    }
+		    else if (subX == 1) {
+		    	if (subY == -1)
+		    		angle = 3*Math.PI/4;
+		    	else if (subY == 0)
+		    		angle = Math.PI;
+		    	else if (subY == 1)
+		    		angle = 5*Math.PI/4;
+		    }
 		}
 		
-		public AffineTransform transForm(AffineTransform at) {
-			if(this.angle == 0) {
+		public AffineTransform transForm(AffineTransform at, int x, int y) {
+			if(this.angle  == 0) {
 				at.translate(x*CSIZE- at.getTranslateX()-car.getWidth()/2, y*CSIZE-at.getTranslateY()-car.getHeight()/2);
 				at.rotate(0);
 			}
@@ -665,16 +685,34 @@ public class PathFinding {
 				at.translate(x*CSIZE- at.getTranslateX()+car.getHeight()/2, y*CSIZE-at.getTranslateY()-car.getWidth()/2);
 				at.rotate(Math.PI/2);
 			}
-			if(this.angle == Math.PI) {
+			if(this.angle== Math.PI) {
 				at.translate(x*CSIZE- at.getTranslateX()+car.getWidth()/2, y*CSIZE-at.getTranslateY()+car.getHeight()/2);
 				at.rotate(Math.PI);
 			}
-			if(this.angle == 3*Math.PI/2) {
-				at.translate(x*CSIZE- at.getTranslateX()-car.getHeight()/2, y*CSIZE+at.getTranslateY()-car.getWidth()/2);
+			if(this.angle== 3*Math.PI/2) {
+				at.translate(x*CSIZE- at.getTranslateX()-car.getHeight()/2, y*CSIZE+at.getTranslateY()+car.getWidth()/2);
 				at.rotate(3*Math.PI/2);
 			}
+		
 			
-			return null;
+			
+			if(this.angle==Math.PI/4) {
+				at.translate(x*CSIZE- at.getTranslateX()+(car.getHeight() -car.getWidth())*Math.sqrt(2)/4, y*CSIZE-at.getTranslateY()-(car.getHeight() +car.getWidth())*Math.sqrt(2)/4);
+				at.rotate(Math.PI/4);
+			}
+			if(this.angle== 3*Math.PI/4) {
+				at.translate(x*CSIZE- at.getTranslateX()+(car.getHeight() +car.getWidth())*Math.sqrt(2)/4, y*CSIZE-at.getTranslateY()+(car.getHeight() -car.getWidth())*Math.sqrt(2)/4);
+				at.rotate(3*Math.PI/4);
+			}
+			if(this.angle== 5*Math.PI/4) {
+				at.translate(x*CSIZE- at.getTranslateX()-(car.getHeight() -car.getWidth())*Math.sqrt(2)/4, y*CSIZE-at.getTranslateY()+(car.getHeight() +car.getWidth())*Math.sqrt(2)/4);
+				at.rotate(5*Math.PI/4);
+			}
+			if(this.angle== 7*Math.PI/4) {
+				at.translate(x*CSIZE- at.getTranslateX()-(car.getHeight() +car.getWidth())*Math.sqrt(2)/4, y*CSIZE-at.getTranslateY()-(car.getHeight() -car.getWidth())*Math.sqrt(2)/4);
+				at.rotate(7*Math.PI/4);
+			}
+			return at;
 			
 		}
 		
