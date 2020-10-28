@@ -37,8 +37,7 @@ public class PathFinding {
 	//GENERAL VARIABLES
 	private int cells = 500;
 	private int delay = 30;
-	private double dense = .5;
-	private double density = (cells*cells)*.5;
+
 	private int startx = -1;
 	private int starty = -1;
 	private int finishx = -1;
@@ -82,7 +81,7 @@ public class PathFinding {
 	//BUTTONS
 	JButton searchB = new JButton("Start Search");
 	JButton resetB = new JButton("Reset");
-	JButton genMapB = new JButton("Generate Map");
+
 	JButton clearMapB = new JButton("Clear Map");
 
 	//DROP DOWN
@@ -104,18 +103,7 @@ public class PathFinding {
 		initialize();
 	}
 	
-	public void generateMap() {	//GENERATE MAP
-		clearMap();	//CREATE CLEAR MAP TO START
-		for(int i = 0; i < density; i++) {
-			Node current;
-			do {
-				int x = r.nextInt(cells);
-				int y = r.nextInt(cells);
-				current = map[x][y];	//FIND A RANDOM NODE IN THE GRID
-			} while(current.getType()==2);	//IF IT IS ALREADY A WALL, FIND A NEW ONE
-			current.setType(2);	//SET NODE TO BE A WALL
-		}
-	}
+	
 	
 	public void clearMap() {	//CLEAR MAP
 		finishx = -1;	//RESET THE START AND FINISH
@@ -173,9 +161,7 @@ public class PathFinding {
 		toolP.add(resetB);
 		space+=buff;
 		
-		genMapB.setBounds(40,space, 150, 25);
-		toolP.add(genMapB);
-		space+=buff;
+		
 		
 		clearMapB.setBounds(40,space, 150, 25);
 		toolP.add(clearMapB);
@@ -242,13 +228,7 @@ public class PathFinding {
 				Update();
 			}
 		});
-		genMapB.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				generateMap();
-				Update();
-			}
-		});
+		
 		clearMapB.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -271,13 +251,7 @@ public class PathFinding {
 				Update();
 			}
 		});
-		obstacles.addChangeListener(new ChangeListener() {
-			@Override
-			public void stateChanged(ChangeEvent e) {
-				dense = (double)obstacles.getValue()/100;
-				Update();
-			}
-		});
+		
 
 		
 		startSearch();	//START STATE
@@ -305,7 +279,7 @@ public class PathFinding {
 	}
 	
 	public void Update() {	//UPDATE ELEMENTS OF THE GUI
-		density = (cells*cells)*dense;
+		
 
 		canvas.repaint();
 
@@ -316,6 +290,7 @@ public class PathFinding {
 	}
 	
 	public void reset() {	//RESET METHOD
+		
 		solving = false;
 		length = 0;
 		checks = 0;
@@ -534,28 +509,47 @@ public class PathFinding {
 		public ArrayList<Node> exploreNeighbors(Node current, int hops) {	//EXPLORE NEIGHBORS
 			ArrayList<Node> explored = new ArrayList<Node>();	//LIST OF NODES THAT HAVE BEEN EXPLORED
 			current.calAngle();
-			if (current.angle == 0) {
-				int[][] pos = {{1, -1}, {1, 0}, {1, 1}};
-			}
-			else if (current.angle == Math.PI) {
-				int[][] pos = {{-1, -1}, {-1, 0}, {-1, 1}};
-			}
-			else if (current.angle == 3*Math.PI/2) {
-				int[][] pos = {{-1, -1}, {-1, 0}, {-1, 1}};
-			}
-			else if (current.angle == Math.PI/2) {
-				int[][] pos = {{-1, -1}, {-1, 0}, {-1, 1}};
-			}
+			
+			int[][] pos = calNextPos(current.angle);
+			
+			
 			for (int[] newPos: pos) {
 				int xbound = current.getX()+newPos[0];
 				int ybound = current.getY()+newPos[1];
+			
+				
+
 				if((xbound > -1 && xbound < cells) && (ybound > -1 && ybound < cells)) {	//MAKES SURE THE NODE IS NOT OUTSIDE THE GRID
 					Node neighbor = map[xbound][ybound];
-					if((neighbor.getHops()==-1 || neighbor.getHops() > hops) && neighbor.getType()!=2) {	//CHECKS IF THE NODE IS NOT A WALL AND THAT IT HAS NOT BEEN EXPLORED
-						explore(neighbor, current.getX(), current.getY(), hops);	//EXPLORE THE NODE
-						explored.add(neighbor);	//ADD THE NODE TO THE LIST
+					
+					neighbor.calAngle(current.getX(), current.getY());
+					int[][] directionPos = calNextPos(neighbor.angle);
+					boolean dir = true;
+					for (int[] dirPos: directionPos) {
+						for (int i = 5; i>=2; i--) {
+							int xboundPlus = xbound+car.getCar().getHeight()/(2*i)*dirPos[0];
+							int yboundPlus = ybound+car.getCar().getHeight()/(2*i)*dirPos[1];
+							if ((xboundPlus <= -1 || xboundPlus >= cells) || (yboundPlus <= -1 || yboundPlus >= cells) ) {
+								dir = false;
+							}
+							else {
+								if(map[xboundPlus][yboundPlus].getType() ==2) {
+									dir = false;
+								}
+							}
+						}
+						
 					}
+					if (dir == true) {
+						if((neighbor.getHops()==-1 || neighbor.getHops() > hops) && neighbor.getType()!=2) {	//CHECKS IF THE NODE IS NOT A WALL AND THAT IT HAS NOT BEEN EXPLORED
+							explore(neighbor, current.getX(), current.getY(), hops);	//EXPLORE THE NODE
+							explored.add(neighbor);	//ADD THE NODE TO THE LIST
+						}
+					}
+					
 				}
+				
+				
 			}
 			return explored;
 		}
@@ -586,9 +580,46 @@ public class PathFinding {
 				map[node.getLastX()][node.getLastY()].setType(6);
 				node.setType(5);
 				Update();
-				delay(100);
+				delay(30);
 			}
 			solving = false;
+		}
+		public int[][] calNextPos(double angle) {
+			
+			if (angle == 0) {
+				int[][] pos = {{1, -1}, {1, 0}, {1, 1}};
+				return pos;
+			}
+			else if (angle == Math.PI) {
+				int[][] pos = {{-1, -1}, {-1, 0}, {-1, 1}};
+				return pos;
+			}
+			else if (angle == Math.PI/2) {
+				int[][] pos = {{-1, 1}, {0, 1}, {1, 1}};
+				return pos;
+			}
+			else if (angle == 3*Math.PI/2) {
+				int[][] pos = {{-1, -1}, {0, -1}, {1, -1}};
+				return pos;
+			}
+			else if (angle == Math.PI/4) {
+				int[][] pos = {{1, 0}, {1, 1}, {0, 1}};
+				return pos;
+			}
+			else if (angle == 3*Math.PI/4) {
+				int[][] pos = {{-1, 0}, {-1, 1}, {0, 1}};
+				return pos;
+			}
+			else if (angle == 5*Math.PI/4) {
+				int[][] pos = {{-1, 0}, {-1, -1}, {0, -1}};
+				return pos;
+			}
+			else {
+				int[][] pos = {{1, 0}, {1, -1}, {0, -1}};
+				return pos;
+			}
+			
+			
 		}
 	}
 	
@@ -603,7 +634,7 @@ public class PathFinding {
 		private int lastY;
 		private double angle;
 		private double dToEnd = 0;
-	
+		
 		public Node(int type, int x, int y) {	//CONSTRUCTOR
 			cellType = type;
 			this.x = x;
@@ -618,6 +649,32 @@ public class PathFinding {
 			return dToEnd;
 		}
 		
+		public void calAngle(int lastX, int lastY) {
+			int subX = lastX-this.x;
+			int subY = lastY-this.y;
+		    if (subX == -1) {
+		    	if (subY == -1)
+		    		angle = Math.PI/4;
+		    	else if(subY == 0)
+		    		angle = 0;
+		    	else if(subY == 1)
+		    		angle = 7*Math.PI/4;
+		    }
+		    else if (subX == 0) {
+		    	if (subY == -1)
+		    		angle = Math.PI/2;
+		    	else if (subY == 1)
+		    		angle = 3*Math.PI/2;
+		    }
+		    else if (subX == 1) {
+		    	if (subY == -1)
+		    		angle = 3*Math.PI/4;
+		    	else if (subY == 0)
+		    		angle = Math.PI;
+		    	else if (subY == 1)
+		    		angle = 5*Math.PI/4;
+		    }
+		}
 		public void calAngle() {
 			int subX = lastX-x;
 			int subY = lastY-y;
