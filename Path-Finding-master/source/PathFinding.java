@@ -11,6 +11,7 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Random;
@@ -35,13 +36,14 @@ public class PathFinding {
 	//FRAME
 	JFrame frame;
 	//GENERAL VARIABLES
-	private int cells = 500;
+	private int cells = 250;
 	private int delay = 30;
 
 	private int startx = -1;
 	private int starty = -1;
 	private int finishx = -1;
 	private int finishy = -1;
+	private double finishAngle = Math.PI;
 	private int tool = 0;
 	private int checks = 0;
 	private int length = 0;
@@ -314,12 +316,13 @@ public class PathFinding {
 		public void paintComponent(Graphics g) {	
 			super.paintComponent(g);
 			Graphics2D g2d = (Graphics2D) g;
+			
 			try {
 				destination = ImageIO.read(getClass().getResourceAsStream("/destination.png"));
 			}catch(Exception e) {
 				e.printStackTrace();
 			}
-			
+		
 			AffineTransform carat = AffineTransform.getTranslateInstance(0, 0);
 			AffineTransform desat = AffineTransform.getTranslateInstance(0, 0);
 			boolean cared = false;
@@ -353,8 +356,10 @@ public class PathFinding {
 							carat = car.transForm(carat,x,y);
 							break;
 						case 6:
-							g.setColor(Color.YELLOW);
+							g.setColor(Color.CYAN);
 							break;
+						case 7:
+							g.setColor(Color.WHITE);
 					}
 					g.fillRect(x*CSIZE,y*CSIZE,CSIZE,CSIZE);
 					g.setColor(Color.BLACK);
@@ -435,12 +440,13 @@ public class PathFinding {
 							finishx = x;	//SET THE FINISH X AND Y
 							finishy = y;
 							current.setType(1);	//SET THE NODE CLICKED TO BE FINISH
+							setFinishWall();
 						}
 						break;
 					}
 					case 2:{
-						for (int i = -5; i<=5; i ++) {
-							for (int j = -5; j <=5; j++) {
+						for (int i = -3; i<=3; i ++) {
+							for (int j = -3; j <=3; j++) {
 								Node cur = map[x+i][y+j];
 								cur.setType(2);
 							}
@@ -457,6 +463,38 @@ public class PathFinding {
 
 		@Override
 		public void mouseReleased(MouseEvent e) {}
+		
+		private void setFinishWall() {
+			if(finishAngle == Math.PI) {
+				for(int i = -6; i<=6; i++) {
+					map[finishx+i][finishy-6].setType(7);
+					map[finishx+i][finishy+6].setType(7);
+					map[finishx+6][finishy+i].setType(7);
+					
+				}
+			}
+			if(finishAngle == 0) {
+				for (int i = -6; i<=6; i++) {
+					map[finishx+i][finishy-6].setType(7);
+					map[finishx+i][finishy+6].setType(7);
+					map[finishx-6][finishy+i].setType(7);
+				}
+			}
+			if(finishAngle == Math.PI/2) {
+				for (int i = -6; i<=6; i++) {
+					map[finishx+6][finishy+i].setType(7);
+					map[finishx+i][finishy+6].setType(7);
+					map[finishx-6][finishy+i].setType(7);
+				}
+			}
+			if(finishAngle == -Math.PI/2) {
+				for (int i = -6; i<=6; i++) {
+					map[finishx+6][finishy+i].setType(7);
+					map[finishx+i][finishy-6].setType(7);
+					map[finishx-6][finishy+i].setType(7);
+				}
+			}
+		}
 	}
 	
 	class Algorithm {	
@@ -527,13 +565,13 @@ public class PathFinding {
 					boolean dir = true;
 					for (int[] dirPos: directionPos) {
 						for (int i = 5; i>=2; i--) {
-							int xboundPlus = xbound+car.getCar().getHeight()/(2*i)*dirPos[0];
-							int yboundPlus = ybound+car.getCar().getHeight()/(2*i)*dirPos[1];
+							int xboundPlus = xbound+(car.getV()+car.getCar().getHeight()/(2*i))*dirPos[0];
+							int yboundPlus = ybound+(car.getV()+car.getCar().getHeight()/(2*i))*dirPos[1];
 							if ((xboundPlus <= -1 || xboundPlus >= cells) || (yboundPlus <= -1 || yboundPlus >= cells) ) {
 								dir = false;
 							}
 							else {
-								if(map[xboundPlus][yboundPlus].getType() ==2) {
+								if(map[xboundPlus][yboundPlus].getType() ==2 ) {
 									dir = false;
 								}
 							}
@@ -541,7 +579,7 @@ public class PathFinding {
 						
 					}
 					if (dir == true) {
-						if((neighbor.getHops()==-1 || neighbor.getHops() > hops) && neighbor.getType()!=2) {	//CHECKS IF THE NODE IS NOT A WALL AND THAT IT HAS NOT BEEN EXPLORED
+						if((neighbor.getHops()==-1 || neighbor.getHops() > hops) && neighbor.getType()!=2 && neighbor.getType()!=7) {	//CHECKS IF THE NODE IS NOT A WALL AND THAT IT HAS NOT BEEN EXPLORED
 							explore(neighbor, current.getX(), current.getY(), hops);	//EXPLORE THE NODE
 							explored.add(neighbor);	//ADD THE NODE TO THE LIST
 						}
@@ -560,7 +598,8 @@ public class PathFinding {
 			current.setLastNode(lastx, lasty);	//KEEP TRACK OF THE NODE THAT THIS NODE IS EXPLORED FROM
 			current.setHops(hops);	//SET THE HOPS FROM THE START
 			checks++;
-			if(current.getType() == 1) {	//IF THE NODE IS THE FINISH THEN BACKTRACK TO GET THE PATH
+			
+			if(current.getType() == 1 ) {	//IF THE NODE IS THE FINISH THEN BACKTRACK TO GET THE PATH
 				backtrack(current.getLastX(), current.getLastY(),hops);
 			}
 		}
@@ -675,6 +714,10 @@ public class PathFinding {
 		    		angle = 5*Math.PI/4;
 		    }
 		}
+		public double getAngle() {
+			calAngle();
+			return angle;
+		}
 		public void calAngle() {
 			int subX = lastX-x;
 			int subY = lastY-y;
@@ -723,6 +766,7 @@ public class PathFinding {
 		private int w; //WIDTH
 		private int l; //LENGTH
 		private BufferedImage car;
+		private int v=1;
 		
 		private double angle;
 		
@@ -847,6 +891,14 @@ public class PathFinding {
 
 		public void setAngle(double angle) {
 			this.angle = angle;
+		}
+
+		public int getV() {
+			return v;
+		}
+
+		public void setV(int v) {
+			this.v = v;
 		}
 		
 		
