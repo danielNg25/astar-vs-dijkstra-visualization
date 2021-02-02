@@ -9,7 +9,7 @@ import java.util.Random;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-public class Map extends JPanel implements MouseListener, MouseMotionListener{	//MAP CLASS
+public class Map extends JPanel implements MouseListener, MouseMotionListener{
 	
 	/**
 	 * 
@@ -19,12 +19,16 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener{	/
 	private static int delay = 30;
 	private static double density = cells*cells*0.5;
 	
-	private final int MSIZE = 600;
-	private int CSIZE = MSIZE/cells;
+	private final int MSIZE = 600; //Map size
+	
+	private int CSIZE = MSIZE/cells; //Cell size
+	
+	//start and finish Node
 	private  int startx = -1;
 	private  int starty = -1;
 	private  int finishx = -1;
 	private  int finishy = -1;
+	
 	private static int tool = 0;
 	private int checks = 0;
 	private int length = 0;
@@ -41,9 +45,9 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener{	/
 		clearMap();
 	}
 	
-	public void paintComponent(Graphics g) {	//REPAINT
+	public void paintComponent(Graphics g) {	//repaint
 		super.paintComponent(g);
-		for(int x = 0; x < cells; x++) {	//PAINT EACH NODE IN THE GRID
+		for(int x = 0; x < cells; x++) {	//paint each node in the grid
 			for(int y = 0; y < cells; y++) {
 				switch(map[x][y].getType()) {
 					case 0:
@@ -99,32 +103,32 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener{	/
 
 	@Override
 	public void mousePressed(MouseEvent e) {
-		resetMap();	//RESET THE MAP WHENEVER CLICKED
+		resetMap();	//reset the map whenever clicked
 		try {
-			int x = e.getX()/CSIZE;	//GET THE X AND Y OF THE MOUSE CLICK IN RELATION TO THE SIZE OF THE GRID
+			int x = e.getX()/CSIZE;	
 			int y = e.getY()/CSIZE;
 			Node current = map[x][y];
 			switch(tool ) {
-				case 0: {	//START NODE
-					if(current.getType()!=2) {	//IF NOT WALL
-						if(startx > -1 && starty > -1) {	//IF START EXISTS SET IT TO EMPTY
+				case 0: {	//start node
+					if(current.getType()!=2) {	//if not wall
+						if(startx > -1 && starty > -1) {	//if start exist set it to empty
 							map[startx][starty].setType(3);
 							map[startx][starty].setHops(-1);
 						}
 						current.setHops(0);
-						startx = x;	//SET THE START X AND Y
+						startx = x;	//set the start node x and y
 						starty = y;
-						current.setType(0);	//SET THE NODE CLICKED TO BE START
+						current.setType(0);	//set the clicked note to be start
 					}
 					break;
 				}
-				case 1: {//FINISH NODE
-					if(current.getType()!=2) {	//IF NOT WALL
-						if(finishx > -1 && finishy > -1)	//IF FINISH EXISTS SET IT TO EMPTY
+				case 1: {
+					if(current.getType()!=2) {	
+						if(finishx > -1 && finishy > -1)	
 							map[finishx][finishy].setType(3);
-						finishx = x;	//SET THE FINISH X AND Y
+						finishx = x;	
 						finishy = y;
-						current.setType(1);	//SET THE NODE CLICKED TO BE FINISH
+						current.setType(1);
 					}
 					break;
 				}
@@ -134,59 +138,59 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener{	/
 					break;
 			}
 			Update();
-		} catch(Exception z) {}	//EXCEPTION HANDLER
+		} catch(Exception z) {}	
 	}
 
 	@Override
 	public void mouseReleased(MouseEvent e) {}
 
 	public void generateMap() {
-		clearMap();	//CREATE CLEAR MAP TO START
+		clearMap();	
 		for(int i = 0; i < density; i++) {
 			Node current;
 			do {
 				int x = r.nextInt(cells);
 				int y = r.nextInt(cells);
-				current = map[x][y];	//FIND A RANDOM NODE IN THE GRID
-			} while(current.getType()==2);	//IF IT IS ALREADY A WALL, FIND A NEW ONE
-			current.setType(2);	//SET NODE TO BE A WALL
+				current = map[x][y];	//find a random not in the grid
+			} while(current.getType()==2);	//if it is already a wall find a new one
+			current.setType(2);	//set note to be wall
 		}
 	}
 	
-	public void clearMap() {	//CLEAR MAP
-		finishx = -1;	//RESET THE START AND FINISH
+	public void clearMap() {	//clear map
+		finishx = -1;	//reset start node and finish node
 		finishy = -1;
 		startx = -1;
 		starty = -1;
 
-		map = new Node[cells][cells];	//CREATE NEW MAP OF NODES
+		map = new Node[cells][cells];	//create new map of node
 		for(int x = 0; x < cells; x++) {
 			for(int y = 0; y < cells; y++) {
-				map[x][y] = new Node(3,x,y);	//SET ALL NODES TO EMPTY
+				map[x][y] = new Node(3,x,y);	//set to empty
 			}
 		}
 		Update();
-		reset();	//RESET SOME VARIABLES
+		reset();	
 	}
 	
-	public void resetMap() {	//RESET MAP
+	public void resetMap() {	//reset map
 		for(int x = 0; x < cells; x++) {
 			for(int y = 0; y < cells; y++) {
 				Node current = map[x][y];
-				if(current.getType() == 4 || current.getType() == 5)	//CHECK TO SEE IF CURRENT NODE IS EITHER CHECKED OR FINAL PATH
-					map[x][y] = new Node(3,x,y);	//RESET IT TO AN EMPTY NODE
+				if(current.getType() == 4 || current.getType() == 5)	
+					map[x][y] = new Node(3,x,y);	//reset note to an empty node
 			}
 		}
-		if(startx > -1 && starty > -1) {	//RESET THE START AND FINISH
+		if(startx > -1 && starty > -1) {	
 			map[startx][starty] = new Node(0,startx,starty);
 			map[startx][starty].setHops(0);
 		}
 		if(finishx > -1 && finishy > -1)
 			map[finishx][finishy] = new Node(1,finishx,finishy);
-		reset();	//RESET SOME VARIABLES
+		reset();	
 	}
 	
-	public void reset() {	//RESET METHOD
+	public void reset() {	
 		solving = false;
 		length = 0;
 		checks = 0;
@@ -197,7 +201,7 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener{	/
 		lblPath.setText("Path Length: " + length);
 		repaint();
 	}
-	public void delay() {	//DELAY METHOD
+	public void delay() {	
 		try {
 			Thread.sleep(delay);
 		} catch(Exception e) {}
@@ -316,7 +320,7 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener{	/
 		return MSIZE;
 	}
 
-
+	//Algorithm class extends Thread to run multi-threading with A star and Dijkstra at the same time
 	class Algorithm extends Thread{	
 		public boolean isAStar;
 		public boolean isAStar() {
@@ -327,39 +331,29 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener{	/
 			this.isAStar = isAStar;
 		}
 
-		//DIJKSTRA WORKS BY PROPAGATING OUTWARDS UNTIL IT FINDS THE FINISH AND THEN WORKING ITS WAY BACK TO GET THE PATH
-		//IT USES A PRIORITY QUE TO KEEP TRACK OF NODES THAT IT NEEDS TO EXPLORE
-		//EACH NODE IN THE PRIORITY QUE IS EXPLORED AND ALL OF ITS NEIGHBORS ARE ADDED TO THE QUE
-		//ONCE A NODE IS EXLPORED IT IS DELETED FROM THE QUE
-		//AN ARRAYLIST IS USED TO REPRESENT THE PRIORITY QUE
-		//A SEPERATE ARRAYLIST IS RETURNED FROM A METHOD THAT EXPLORES A NODES NEIGHBORS
-		//THIS ARRAYLIST CONTAINS ALL THE NODES THAT WERE EXPLORED, IT IS THEN ADDED TO THE QUE
-		//A HOPS VARIABLE IN EACH NODE REPRESENTS THE NUMBER OF NODES TRAVELED FROM THE START
+		//Dijkstra Algorithm Main Method
 		public void Dijkstra() {
-			ArrayList<Node> priority = new ArrayList<Node>();	//CREATE A PRIORITY QUE
-			priority.add(map[startx][starty]);	//ADD THE START TO THE QUE
+			ArrayList<Node> priority = new ArrayList<Node>();	//create a priority que
+			priority.add(map[startx][starty]);	//add the start to the que
 			while(solving) {
-				if(priority.size() <= 0) {	//IF THE QUE IS 0 THEN NO PATH CAN BE FOUND
+				if(priority.size() <= 0) {	//if the que is 0 then no path can be found
 					solving = false;
 					break;
 				}
-				int hops = priority.get(0).getHops()+1;	//INCREMENT THE HOPS VARIABLE
-				ArrayList<Node> explored = exploreNeighbors(priority.get(0), hops);	//CREATE AN ARRAYLIST OF NODES THAT WERE EXPLORED
+				int hops = priority.get(0).getHops()+1;	//increment the hops variable
+				ArrayList<Node> explored = exploreNeighbors(priority.get(0), hops);	//create an arraylist of nodes that were explored
 				if(explored.size() > 0) {
-					priority.remove(0);	//REMOVE THE NODE FROM THE QUE
-					priority.addAll(explored);	//ADD ALL THE NEW NODES TO THE QUE
+					priority.remove(0);	//remove the node from the que
+					priority.addAll(explored);	//add all the new nodes to the que
 					Update();
 					delay();
-				} else {	//IF NO NODES WERE EXPLORED THEN JUST REMOVE THE NODE FROM THE QUE
+				} else {	//if no nodes were explored then just remove the node from the que
 					priority.remove(0);
 				}
 			}
 		}
 		
-		//A STAR WORKS ESSENTIALLY THE SAME AS DIJKSTRA CREATING A PRIORITY QUE AND PROPAGATING OUTWARDS UNTIL IT FINDS THE END
-		//HOWEVER ASTAR BUILDS IN A HEURISTIC OF DISTANCE FROM ANY NODE TO THE FINISH
-		//THIS MEANS THAT NODES THAT ARE CLOSER TO THE FINISH WILL BE EXPLORED FIRST
-		//THIS HEURISTIC IS BUILT IN BY SORTING THE QUE ACCORDING TO HOPS PLUS DISTANCE UNTIL THE FINISH
+		//A Star Algorithm Main Method
 		public void AStar() {
 			ArrayList<Node> priority = new ArrayList<Node>();
 			priority.add(map[startx][starty]);
@@ -378,11 +372,12 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener{	/
 				} else {
 					priority.remove(0);
 				}
-				sortQue(priority);	//SORT THE PRIORITY QUE
+				sortQue(priority);	//sort the priority que
 			}
 		}
 		
-		public ArrayList<Node> sortQue(ArrayList<Node> sort) {	//SORT PRIORITY QUE
+		
+		public ArrayList<Node> sortQue(ArrayList<Node> sort) {	//sort priority que
 			int c = 0;
 			while(c < sort.size()) {
 				int sm = c;
@@ -400,17 +395,17 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener{	/
 			return sort;
 		}
 		
-		public ArrayList<Node> exploreNeighbors(Node current, int hops) {	//EXPLORE NEIGHBORS
-			ArrayList<Node> explored = new ArrayList<Node>();	//LIST OF NODES THAT HAVE BEEN EXPLORED
+		public ArrayList<Node> exploreNeighbors(Node current, int hops) {	//explore neighbors
+			ArrayList<Node> explored = new ArrayList<Node>();	//list of nodes that have been explored
 			for(int a = -1; a <= 1; a++) {
 				for(int b = -1; b <= 1; b++) {
 					int xbound = current.getX()+a;
 					int ybound = current.getY()+b;
-					if((xbound > -1 && xbound < cells) && (ybound > -1 && ybound < cells)) {	//MAKES SURE THE NODE IS NOT OUTSIDE THE GRID
+					if((xbound > -1 && xbound < cells) && (ybound > -1 && ybound < cells)) {	//makes sure the node is not outside the grid
 						Node neighbor = map[xbound][ybound];
-						if((neighbor.getHops()==-1 || neighbor.getHops() > hops) && neighbor.getType()!=2) {	//CHECKS IF THE NODE IS NOT A WALL AND THAT IT HAS NOT BEEN EXPLORED
-							explore(neighbor, current.getX(), current.getY(), hops);	//EXPLORE THE NODE
-							explored.add(neighbor);	//ADD THE NODE TO THE LIST
+						if((neighbor.getHops()==-1 || neighbor.getHops() > hops) && neighbor.getType()!=2) {	//checks if the node is not a wall and that it has not been explored
+							explore(neighbor, current.getX(), current.getY(), hops);	//explore the node
+							explored.add(neighbor);	//add the node to the list
 						}
 					}
 				}
@@ -418,20 +413,20 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener{	/
 			return explored;
 		}
 		
-		public void explore(Node current, int lastx, int lasty, int hops) {	//EXPLORE A NODE
-			if(current.getType()!=0 && current.getType() != 1)	//CHECK THAT THE NODE IS NOT THE START OR FINISH
-				current.setType(4);	//SET IT TO EXPLORED
-			current.setLastNode(lastx, lasty);	//KEEP TRACK OF THE NODE THAT THIS NODE IS EXPLORED FROM
-			current.setHops(hops);	//SET THE HOPS FROM THE START
+		public void explore(Node current, int lastx, int lasty, int hops) {	//explore a node
+			if(current.getType()!=0 && current.getType() != 1)	//check that the node is not the start or finish
+				current.setType(4);	//set it to explored
+			current.setLastNode(lastx, lasty);	//keep track of the node that this node is explored from
+			current.setHops(hops);	//set the hops from the start
 			checks++;
-			if(current.getType() == 1) {	//IF THE NODE IS THE FINISH THEN BACKTRACK TO GET THE PATH
+			if(current.getType() == 1) {	//if the node is the finish then backtrack to get the path
 				backtrack(current.getLastX(), current.getLastY(),hops);
 			}
 		}
 		
-		public void backtrack(int lx, int ly, int hops) {	//BACKTRACK
+		public void backtrack(int lx, int ly, int hops) {	//backtrack
 			length = hops;
-			while(hops > 1) {	//BACKTRACK FROM THE END OF THE PATH TO THE START
+			while(hops > 1) {	//backtrack from the end of the path to the start
 				Node current = map[lx][ly];
 				current.setType(5);
 				lx = current.getLastX();

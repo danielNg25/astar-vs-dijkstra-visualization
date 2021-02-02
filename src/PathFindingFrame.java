@@ -25,8 +25,9 @@ public class PathFindingFrame extends JFrame {
 	private JPanel contentPane;
 
 	private String[] tools = {"Start","Finish","Wall", "Eraser"};
+	//mapAstar and mapDij instances
 	Map mapAstar, mapDij;
-	//BORDER
+	//border of control panel
 	Border loweredetched = BorderFactory.createEtchedBorder(EtchedBorder.LOWERED);
 	/**
 	 * Launch the application.
@@ -57,7 +58,7 @@ public class PathFindingFrame extends JFrame {
 		contentPane.add(panel);
 		panel.setLayout(null);
 		
-
+		//add map to pane
 		mapAstar = new Map();
 		mapAstar.alg.setAStar(true);
 		mapAstar.setBounds(234, 10, 601, 601);
@@ -68,6 +69,7 @@ public class PathFindingFrame extends JFrame {
 		mapDij.setBounds(858, 10, 601, 601);
 		contentPane.add(mapDij);
 		
+		//search button
 		JButton btnSearch = new JButton("Start Search");
 		btnSearch.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -82,6 +84,7 @@ public class PathFindingFrame extends JFrame {
 		btnSearch.setBounds(27, 90, 142, 23);
 		panel.add(btnSearch);
 		
+		//clear button
 		JButton btnClear = new JButton("Clear Map");
 		btnClear.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -92,6 +95,7 @@ public class PathFindingFrame extends JFrame {
 		btnClear.setBounds(27, 141, 142, 23);
 		panel.add(btnClear);
 		
+		//generate map button
 		JButton btnGen = new JButton("Generate Map");
 		btnGen.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -102,6 +106,7 @@ public class PathFindingFrame extends JFrame {
 		btnGen.setBounds(27, 192, 142, 23);
 		panel.add(btnGen);
 		
+		//tool box to create elements on the grid
 		JLabel lblNewLabel = new JLabel("Tool Box");
 		lblNewLabel.setBounds(27, 249, 75, 14);
 		panel.add(lblNewLabel);
@@ -116,6 +121,7 @@ public class PathFindingFrame extends JFrame {
 		comboBox.setBounds(27, 275, 142, 22);
 		panel.add(comboBox);
 		
+		//set button A Star map and Dijsktra map to be the same
 		JButton btnSetMap = new JButton("Set Map");
 		btnSetMap.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -125,6 +131,7 @@ public class PathFindingFrame extends JFrame {
 		btnSetMap.setBounds(27, 42, 142, 23);
 		panel.add(btnSetMap);
 		
+		//map size adjustment
 		JLabel lblSize = new JLabel("20x20");
 		lblSize.setBounds(143, 326, 45, 26);
 		panel.add(lblSize);
@@ -145,7 +152,7 @@ public class PathFindingFrame extends JFrame {
 		lblNewLabel_1_1.setBounds(10, 326, 34, 26);
 		panel.add(lblNewLabel_1_1);
 		
-		
+		//Obstacle density adjustment
 		JLabel lblNewLabel_1_1_2 = new JLabel("Obs");
 		lblNewLabel_1_1_2.setBounds(10, 363, 34, 26);
 		panel.add(lblNewLabel_1_1_2);
@@ -166,7 +173,7 @@ public class PathFindingFrame extends JFrame {
 		panel.add(sliderObs);
 		
 		
-		
+		//delay time adjustment
 		JLabel lblNewLabel_1_1_3 = new JLabel("Delay");
 		lblNewLabel_1_1_3.setBounds(10, 400, 34, 26);
 		panel.add(lblNewLabel_1_1_3);
@@ -187,7 +194,7 @@ public class PathFindingFrame extends JFrame {
 		panel.add(sliderDelay);
 		
 		
-		
+		//number of node checked and final path
 		JLabel lblAStar = new JLabel("A Star:");
 		lblAStar.setBounds(10, 437, 75, 14);
 		panel.add(lblAStar);
@@ -231,10 +238,10 @@ public class PathFindingFrame extends JFrame {
 			
 		}
 		
-		pause();	//PAUSE STATE
+		pause();	//pause state
 	}
 	
-	private void pause() {	//PAUSE STATE
+	private void pause() {	//pause state
 		int i = 0;
 		while(!mapAstar.isSolving()||!mapDij.isSolving()) {
 			i++;
@@ -244,7 +251,7 @@ public class PathFindingFrame extends JFrame {
 				Thread.sleep(1);
 			} catch(Exception e) {}
 		}
-		startSearch();	//START STATE
+		startSearch();	//start state
 	}
 	private void clearMap() {
 		mapAstar.clearMap();
