@@ -4,13 +4,21 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.util.ArrayList;
+import java.util.Random;
 
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 public class Map extends JPanel implements MouseListener, MouseMotionListener{	//MAP CLASS
 	
-	private int cells = 20;
-	private int delay = 30;
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private static int  cells = 20;
+	private static int delay = 30;
+	private static double density = cells*cells*0.5;
+	
 	private final int MSIZE = 600;
 	private int CSIZE = MSIZE/cells;
 	private  int startx = -1;
@@ -21,92 +29,11 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener{	/
 	private int checks = 0;
 	private int length = 0;
 	private boolean solving = false;
-	Algorithm alg = new Algorithm(); 
+	Random r = new Random();
+	Algorithm alg = new Algorithm();
+	public JLabel lblChecked = new JLabel("Checked: " + checks);
+	public JLabel lblPath = new JLabel("Path Length: " + length);
 	
-	public int getCells() {
-		return cells;
-	}
-
-	public void setCells(int cells) {
-		this.cells = cells;
-	}
-
-	public int getDelay() {
-		return delay;
-	}
-
-	public void setDelay(int delay) {
-		this.delay = delay;
-	}
-
-	public int getCSIZE() {
-		return CSIZE;
-	}
-
-	public void setCSIZE(int cSIZE) {
-		CSIZE = cSIZE;
-	}
-
-	public int getStartx() {
-		return startx;
-	}
-
-	public void setStartx(int startx) {
-		this.startx = startx;
-	}
-
-	public int getStarty() {
-		return starty;
-	}
-
-	public void setStarty(int starty) {
-		this.starty = starty;
-	}
-
-	public int getFinishx() {
-		return finishx;
-	}
-
-	public void setFinishx(int finishx) {
-		this.finishx = finishx;
-	}
-
-	public int getFinishy() {
-		return finishy;
-	}
-
-	public void setFinishy(int finishy) {
-		this.finishy = finishy;
-	}
-
-	public int getChecks() {
-		return checks;
-	}
-
-	public void setChecks(int checks) {
-		this.checks = checks;
-	}
-
-	public int getLength() {
-		return length;
-	}
-
-	public void setLength(int length) {
-		this.length = length;
-	}
-
-	public boolean isSolving() {
-		return solving;
-	}
-
-	public void setSolving(boolean solving) {
-		this.solving = solving;
-	}
-
-	public int getMSIZE() {
-		return MSIZE;
-	}
-
 	Node[][] map;
 	public Map() {
 		addMouseListener(this);
@@ -213,18 +140,32 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener{	/
 	@Override
 	public void mouseReleased(MouseEvent e) {}
 
+	public void generateMap() {
+		clearMap();	//CREATE CLEAR MAP TO START
+		for(int i = 0; i < density; i++) {
+			Node current;
+			do {
+				int x = r.nextInt(cells);
+				int y = r.nextInt(cells);
+				current = map[x][y];	//FIND A RANDOM NODE IN THE GRID
+			} while(current.getType()==2);	//IF IT IS ALREADY A WALL, FIND A NEW ONE
+			current.setType(2);	//SET NODE TO BE A WALL
+		}
+	}
+	
 	public void clearMap() {	//CLEAR MAP
 		finishx = -1;	//RESET THE START AND FINISH
 		finishy = -1;
 		startx = -1;
 		starty = -1;
+
 		map = new Node[cells][cells];	//CREATE NEW MAP OF NODES
 		for(int x = 0; x < cells; x++) {
 			for(int y = 0; y < cells; y++) {
 				map[x][y] = new Node(3,x,y);	//SET ALL NODES TO EMPTY
 			}
 		}
-		repaint();
+		Update();
 		reset();	//RESET SOME VARIABLES
 	}
 	
@@ -252,6 +193,8 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener{	/
 	}
 	public void Update() {
 		CSIZE = MSIZE/cells;
+		lblChecked.setText("Checked: " + checks);
+		lblPath.setText("Path Length: " + length);
 		repaint();
 	}
 	public void delay() {	//DELAY METHOD
@@ -260,7 +203,7 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener{	/
 		} catch(Exception e) {}
 	}
 	public void setTool(int tool) {
-		this.tool= tool;
+		Map.tool= tool;
 	}
 	
 	public Node[][] getMap() {
@@ -281,8 +224,100 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener{	/
 		}
 		this.repaint();
 	}
+	public static double getDensity() {
+		return density;
+	}
 
-	class Algorithm implements Runnable{	
+	public static void setDensity(double density) {
+		Map.density = density;
+	}
+
+	public int getCells() {
+		return cells;
+	}
+
+	public static void setCells(int cells) {
+		Map.cells = cells;
+	}
+
+	public int getDelay() {
+		return delay;
+	}
+
+	public static void setDelay(int delay) {
+		Map.delay = delay;
+	}
+
+	public int getCSIZE() {
+		return CSIZE;
+	}
+
+	public void setCSIZE(int cSIZE) {
+		CSIZE = cSIZE;
+	}
+
+	public int getStartx() {
+		return startx;
+	}
+
+	public void setStartx(int startx) {
+		this.startx = startx;
+	}
+
+	public int getStarty() {
+		return starty;
+	}
+
+	public void setStarty(int starty) {
+		this.starty = starty;
+	}
+
+	public int getFinishx() {
+		return finishx;
+	}
+
+	public void setFinishx(int finishx) {
+		this.finishx = finishx;
+	}
+
+	public int getFinishy() {
+		return finishy;
+	}
+
+	public void setFinishy(int finishy) {
+		this.finishy = finishy;
+	}
+
+	public int getChecks() {
+		return checks;
+	}
+
+	public void setChecks(int checks) {
+		this.checks = checks;
+	}
+
+	public int getLength() {
+		return length;
+	}
+
+	public void setLength(int length) {
+		this.length = length;
+	}
+
+	public boolean isSolving() {
+		return solving;
+	}
+
+	public void setSolving(boolean solving) {
+		this.solving = solving;
+	}
+
+	public int getMSIZE() {
+		return MSIZE;
+	}
+
+
+	class Algorithm extends Thread{	
 		public boolean isAStar;
 		public boolean isAStar() {
 			return isAStar;
@@ -409,14 +444,20 @@ public class Map extends JPanel implements MouseListener, MouseMotionListener{	/
 		@Override
 		public void run() {
 			if(isAStar) {
-				AStar();
+				AStar();	
 			}
 			else {
 				Dijkstra();
 			}
+			try {
+				Thread.sleep(50);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			
 		}
-
+		
 
 	}
 }

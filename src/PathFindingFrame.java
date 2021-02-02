@@ -1,5 +1,3 @@
-import java.awt.EventQueue;
-
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.Border;
@@ -14,6 +12,9 @@ import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.ItemEvent;
+import javax.swing.JSlider;
+import javax.swing.event.ChangeListener;
+import javax.swing.event.ChangeEvent;
 
 public class PathFindingFrame extends JFrame {
 
@@ -44,6 +45,7 @@ public class PathFindingFrame extends JFrame {
 		
 		setBounds(100, 100, 1500, 670);
 		
+		
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
@@ -51,62 +53,11 @@ public class PathFindingFrame extends JFrame {
 		
 		JPanel panel = new JPanel();
 		panel.setBorder(BorderFactory.createTitledBorder(loweredetched,"Controls"));
-		panel.setBounds(10, 10, 198, 600);
+		panel.setBounds(10, 10, 197, 600);
 		contentPane.add(panel);
 		panel.setLayout(null);
 		
-		JButton btnNewButton = new JButton("Start Search");
-		btnNewButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				reset();
-				
-					mapAstar.setSolving (true);
-					mapDij.setSolving (true);
-					
-				
-			}
-		});
-		btnNewButton.setBounds(46, 89, 107, 23);
-		panel.add(btnNewButton);
-		
-		JButton btnNewButton_1_1 = new JButton("Clear Map");
-		btnNewButton_1_1.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				mapAstar.clearMap();
-				mapDij.clearMap();
-			}
-		});
-		btnNewButton_1_1.setBounds(46, 140, 107, 23);
-		panel.add(btnNewButton_1_1);
-		
-		JButton btnNewButton_1_2 = new JButton("Generate Map");
-		btnNewButton_1_2.setBounds(46, 191, 107, 23);
-		panel.add(btnNewButton_1_2);
-		
-		JLabel lblNewLabel = new JLabel("Tool Box");
-		lblNewLabel.setBounds(46, 237, 75, 14);
-		panel.add(lblNewLabel);
-		
-		JComboBox comboBox = new JComboBox(tools);
-		comboBox.addItemListener(new ItemListener() {
-			public void itemStateChanged(ItemEvent e) {
-				mapAstar.setTool(comboBox.getSelectedIndex());
-			}
-		});
-		
-		comboBox.setBounds(46, 274, 107, 22);
-		panel.add(comboBox);
-		
-		JButton btnSetMap = new JButton("Set Map");
-		btnSetMap.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				mapDij.setMap(mapAstar);
-			}
-		});
-		btnSetMap.setBounds(46, 41, 107, 23);
-		panel.add(btnSetMap);
-		
-		
+
 		mapAstar = new Map();
 		mapAstar.alg.setAStar(true);
 		mapAstar.setBounds(234, 10, 601, 601);
@@ -116,8 +67,156 @@ public class PathFindingFrame extends JFrame {
 		mapDij.alg.setAStar(false);
 		mapDij.setBounds(858, 10, 601, 601);
 		contentPane.add(mapDij);
+		
+		JButton btnSearch = new JButton("Start Search");
+		btnSearch.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				reset();
+				
+					mapAstar.setSolving (true);
+					mapDij.setSolving (true);
+					
+				
+			}
+		});
+		btnSearch.setBounds(27, 90, 142, 23);
+		panel.add(btnSearch);
+		
+		JButton btnClear = new JButton("Clear Map");
+		btnClear.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				clearMap();
+				
+			}
+		});
+		btnClear.setBounds(27, 141, 142, 23);
+		panel.add(btnClear);
+		
+		JButton btnGen = new JButton("Generate Map");
+		btnGen.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				mapAstar.generateMap();
+				mapDij.setMap(mapAstar);
+			}
+		});
+		btnGen.setBounds(27, 192, 142, 23);
+		panel.add(btnGen);
+		
+		JLabel lblNewLabel = new JLabel("Tool Box");
+		lblNewLabel.setBounds(27, 249, 75, 14);
+		panel.add(lblNewLabel);
+		
+		JComboBox comboBox = new JComboBox(tools);
+		comboBox.addItemListener(new ItemListener() {
+			public void itemStateChanged(ItemEvent e) {
+				mapAstar.setTool(comboBox.getSelectedIndex());
+			}
+		});
+		
+		comboBox.setBounds(27, 275, 142, 22);
+		panel.add(comboBox);
+		
+		JButton btnSetMap = new JButton("Set Map");
+		btnSetMap.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				mapDij.setMap(mapAstar);
+			}
+		});
+		btnSetMap.setBounds(27, 42, 142, 23);
+		panel.add(btnSetMap);
+		
+		JLabel lblSize = new JLabel("20x20");
+		lblSize.setBounds(143, 326, 45, 26);
+		panel.add(lblSize);
+		
+		JSlider sliderSize = new JSlider(1,5,2);
+		sliderSize.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				Map.setCells(sliderSize.getValue()*10);
+				clearMap();
+				lblSize.setText(mapAstar.getCells() + "x" + mapAstar.getCells());		
+			}
+		});
+		sliderSize.setMajorTickSpacing(10);
+		sliderSize.setBounds(41, 326, 92, 26);
+		panel.add(sliderSize);
+		
+		JLabel lblNewLabel_1_1 = new JLabel("Size");
+		lblNewLabel_1_1.setBounds(10, 326, 34, 26);
+		panel.add(lblNewLabel_1_1);
+		
+		
+		JLabel lblNewLabel_1_1_2 = new JLabel("Obs");
+		lblNewLabel_1_1_2.setBounds(10, 363, 34, 26);
+		panel.add(lblNewLabel_1_1_2);
+		
+		JLabel lblObs = new JLabel("50%");
+		lblObs.setBounds(143, 363, 45, 26);
+		panel.add(lblObs);
+		
+		JSlider sliderObs = new JSlider(1,100,50);
+		sliderObs.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				Map.setDensity((double)sliderObs.getValue()/100*mapAstar.getCells() *mapAstar.getCells() );
+				lblObs.setText(sliderObs.getValue() +"%");
+			}
+		});
+		sliderObs.setMajorTickSpacing(5);
+		sliderObs.setBounds(41, 363, 92, 26);
+		panel.add(sliderObs);
+		
+		
+		
+		JLabel lblNewLabel_1_1_3 = new JLabel("Delay");
+		lblNewLabel_1_1_3.setBounds(10, 400, 34, 26);
+		panel.add(lblNewLabel_1_1_3);
+		
+		JLabel lblDelay = new JLabel("30ms");
+		lblDelay.setBounds(143, 400, 45, 26);
+		panel.add(lblDelay);
+		
+		JSlider sliderDelay = new JSlider(0,500,30);
+		sliderDelay.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				Map.setDelay(sliderDelay.getValue());
+				lblDelay.setText(sliderDelay.getValue() + "ms");
+			}
+		});
+		sliderDelay.setMajorTickSpacing(5);
+		sliderDelay.setBounds(41, 400, 92, 26);
+		panel.add(sliderDelay);
+		
+		
+		
+		JLabel lblAStar = new JLabel("A Star:");
+		lblAStar.setBounds(10, 437, 75, 14);
+		panel.add(lblAStar);
+		
+		JLabel lblAStarChecked = mapAstar.lblChecked;
+		lblAStarChecked.setBounds(39, 462, 117, 14);
+		panel.add(lblAStarChecked);
+		
+		JLabel lblAStarPath = mapAstar.lblPath;
+		lblAStarPath.setBounds(39, 491, 117, 14);
+		panel.add(lblAStarPath);
+		
+		JLabel lblNewLabel_1_3 = new JLabel("Dijkstra ");
+		lblNewLabel_1_3.setBounds(10, 521, 75, 14);
+		panel.add(lblNewLabel_1_3);
+		
+		JLabel lblDijChecked = mapDij.lblChecked;
+		lblDijChecked.setBounds(39, 546, 117, 14);
+		panel.add(lblDijChecked);
+		
+		JLabel lblDijPath = mapDij.lblPath;
+		lblDijPath.setBounds(39, 575, 117, 14);
+		panel.add(lblDijPath);
+		
+		
 		setVisible(true);
-		startSearch();
+		try {
+			startSearch();
+		}catch(IllegalThreadStateException e) {	}
 	}
 	
 	private void reset() {
@@ -127,17 +226,15 @@ public class PathFindingFrame extends JFrame {
 	
 	private void startSearch() {
 		if (mapAstar.isSolving()||mapDij.isSolving()) {
-			Thread aStarThread = new Thread(mapAstar.alg);
-			Thread dijThread = new Thread(mapDij.alg);
-			aStarThread.run();
-			dijThread.run();
+			mapAstar.alg.start();
+			mapDij.alg.start();
 			
 		}
 		
 		pause();	//PAUSE STATE
 	}
 	
-	public void pause() {	//PAUSE STATE
+	private void pause() {	//PAUSE STATE
 		int i = 0;
 		while(!mapAstar.isSolving()||!mapDij.isSolving()) {
 			i++;
@@ -148,6 +245,10 @@ public class PathFindingFrame extends JFrame {
 			} catch(Exception e) {}
 		}
 		startSearch();	//START STATE
+	}
+	private void clearMap() {
+		mapAstar.clearMap();
+		mapDij.clearMap();
 	}
 	
 }
