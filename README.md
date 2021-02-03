@@ -1,11 +1,11 @@
 # A* Pathfinding vs Dijkstra Pathfinding Comparision
 
 ## Description
-This program demonstrates the comparison between A star pathfinding algorithm and Dijkstra's pathfinding algorithm
-Using java with Swing library to create the UI and Graphic library to draw the map
+This program demonstrates the comparison between A star pathfinding algorithm and Dijkstra's pathfinding algorithm.
+Using java with Swing library to create the UI and Graphic library to draw the map.
 
 ## Demo
-You can see number of checked nodes and length of the final path on ther left bottom corner
+You can see number of checked nodes and length of the final path on ther left bottom corner.
 ![Demo](https://user-images.githubusercontent.com/53716352/106691304-22e01300-6588-11eb-8ed8-ae0fa3629138.gif)
 
 ## Main Features
